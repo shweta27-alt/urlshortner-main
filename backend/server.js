@@ -15,7 +15,7 @@ app.use(bodyParser.json({ limit: '2mb' }));
 //cors to allow origin and methods
 app.use(
     cors({
-      origin:[ "http://localhost:8081","http://localhost:5080","https://webchatapplication-chatify.fly.dev","http://localhost:8080"],
+      origin:[ "http://localhost:8081","http://localhost:5080","http://localhost:8080"],
       methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
       credentials: true,
       sameSite: 'none'

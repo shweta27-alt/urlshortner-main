@@ -2,7 +2,7 @@ const session = require('express-session');
 let MongoDBStore = require('connect-mongodb-session')(session);
 
 const store = new MongoDBStore({
-    uri: 'mongodb://localhost:27017/urlShortnerDb',
+    uri: 'mongodb+srv://shweta277:Poiuytrewq%4012345@cluster0.dbc32st.mongodb.net/UrlShortener?retryWrites=true&w=majority',
     collection: 'sessions'
 });
 

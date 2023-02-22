@@ -14,7 +14,7 @@ function createConnection(dbURL, name, options) {
 //connect mongo db 
 function connect() {
     urlShortnerDb = createConnection(
-        'mongodb://localhost:27017/urlShortnerDb',
+        'mongodb+srv://shweta277:Poiuytrewq%4012345@cluster0.dbc32st.mongodb.net/UrlShortener?retryWrites=true&w=majority',
         'urlShortnerDb'
     );
 }

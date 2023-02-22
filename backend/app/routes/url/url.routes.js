@@ -112,8 +112,8 @@ router.post("/short-url", async (req, res, next) => {
       async (err, cd) => {
         //if not found create a new counter with intial value as 100000000
         if (cd == null) {
-          const newVal = new Counter({ id: "autoval", counter: 100000000 });
-          newVal.save();
+          const newVal =  new Counter({ id: "autoval", counter: 100000000 });
+          await newVal.save();
         }
         //else pass this counter to base62 to get the short id
         let base62Counter = cd.counter;
@@ -134,7 +134,7 @@ router.post("/short-url", async (req, res, next) => {
   }
 });
 
-//route to redect to long url with shortId
+//route to redirect to long url with shortId
 router.get("/:shortId", async (req, res, next) => {
   const shortId = req.params.shortId;
   //validation for short id
