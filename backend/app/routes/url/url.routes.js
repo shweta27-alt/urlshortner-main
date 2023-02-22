@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Url = require("../../models/url.model");
-const User = require("../../models/user.model");
 const Counter = require("../../models/counter.model");
-const { checkAuthenticated } = require("../../middlewares");
 
 const base62 = (number) => {
   let quotient = number;
@@ -72,19 +70,19 @@ const base62 = (number) => {
     "Y",
     "Z",
   ];
-
+  //until quotient is less then 62
   while (quotient >= 62) {
-    reminder.push(quotient % 62);
-    quotient = Math.floor(quotient / 62);
+    reminder.push(quotient % 62);  //store the mod in reminder array
+    quotient = Math.floor(quotient / 62); 
   }
 
-  quotient = codes[quotient];
+  quotient = codes[quotient]; //get the respective quotient value from codes array
 
   while (reminder.length > 0) {
-    quotient = quotient + codes[reminder.pop()];
+    quotient = quotient + codes[reminder.pop()]; //concat the reminder array value from codes array to quotiont
   }
 
-  return quotient;
+  return quotient; // return the base 62 code
 };
 
 // route to create a short url for long url
@@ -94,27 +92,33 @@ router.post("/short-url", async (req, res, next) => {
   if (!url) {
     return res.status(400).json({ message: "Invalid url send" });
   }
+  //validate for a valid url
   const regexp =
     /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
   if (!regexp.test(url)) {
     return res.status(400).json({ message: "Invalid url send" });
   }
   try {
+    //if already long url exists so find and return the short id
     let urlExists = await Url.findOne({ redirectUrl: url });
     if (urlExists) {
       return res.status(200).json({ id: urlExists.shortId });
     }
+    //find the counter in counter collection
     Counter.findOneAndUpdate(
       { id: "autoval" },
       { $inc: { counter: 1 } },
       { new: true },
       async (err, cd) => {
+        //if not found create a new counter with intial value as 100000000
         if (cd == null) {
           const newVal = new Counter({ id: "autoval", counter: 100000000 });
           newVal.save();
         }
-        let base62Counter = cd.counter || 10000000;
+        //else pass this counter to base62 to get the short id
+        let base62Counter = cd.counter;
         const shortId = base62(base62Counter);
+        //map long url to short url
         let urlInstance = new Url({
           shortId: shortId,
           redirectUrl: url,
@@ -130,12 +134,14 @@ router.post("/short-url", async (req, res, next) => {
   }
 });
 
-//route to redect to long url
+//route to redect to long url with shortId
 router.get("/:shortId", async (req, res, next) => {
   const shortId = req.params.shortId;
+  //validation for short id
   if (!shortId) {
     return res.status(400).json({ message: "Something went wrong" });
   }
+  //find the short id and also insert the current timestamp for analytics
   let data = await Url.findOneAndUpdate(
     {
       shortId,
@@ -150,9 +156,10 @@ router.get("/:shortId", async (req, res, next) => {
 });
 
 
-
+//route to get the analytics
 router.get("/analytics/:shortId", async (req, res, next) => {
   const shortId = req.params.shortId;
+    //validation for short id
   if (!shortId) {
     return res.status(400).json({ message: "Something went wrong" });
   }
@@ -161,8 +168,8 @@ router.get("/analytics/:shortId", async (req, res, next) => {
     return res
     .status(200)
     .json({
-      totalClicks: result.visitHistory.length,
-      analytics: result.visitHistory,
+      totalClicks: result.visitHistory.length, //total clicks will be length of all the inserted timestamp
+      analytics: result.visitHistory, // return visitHistory array
     });
   }
   return res.status(400).json({ message: "No Data Found" });

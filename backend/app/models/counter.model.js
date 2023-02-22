@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const { geturlShortnerDb } = require("../../mongoose.init");
 let urlShortnerDb = geturlShortnerDb();
 
+//counter model to pass the counter to base62 to get the short id
 const Counter = new Schema(
   {
     counter: {
